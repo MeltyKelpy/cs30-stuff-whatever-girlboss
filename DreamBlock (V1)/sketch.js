@@ -13,32 +13,38 @@ var dashFrames = 0;
 var current_color = 0;
 var colors = ["red", "green", "blue", "yellow"]
 var platforms = []
+var phase_platforms = []
 
 function setup() {
-  createCanvas(800,400);  
+  const game = createCanvas(800,400);
+  game.canvas.style = "";
 
   player_ig = createSprite(200, 200, 50, 50);
   player_ig.setCollider("rectangle", 0,0,50,50);
   player_ig.shapeColor = color(34, 56, 76);
+
   platform = createSprite(400, 400, 1500, 100);
   platforms.push(platform);
+  platform2 = createSprite(600, 200, 300, 50);
+  phase_platforms.push(platform2);
   
 }
 
 function draw() {
-  background(255,255,255);  
+  background(150,150,150);  
   
   fill(200);
   textAlign(CENTER);
-  text("Press x and z", width/2, 20);
+  text("DreamBlock V1", width/2, 20);
   
   if (dashFrames <= 0) {
     player_ig.velocity.y += GRAVITY;
+    player_ig.shapeColor = colors[current_color];
   }
   else {
+    player_ig.shapeColor = color(255, 255, 255);
     dashFrames -= 1;
   }
-  player_ig.shapeColor = colors[current_color];
   
   if (storeJump > 0) {
     storeJump -= 1;
@@ -48,14 +54,30 @@ function draw() {
     }
   }
   
-  console.log(player_ig.velocity.x + ", " + player_ig.velocity.y);
+  // console.log(player_ig.velocity.x + ", " + player_ig.velocity.y);
   
   for (let i = 0; i < platforms.length; i++) {
     if(player_ig.collide(platforms[i])) {
       player_ig.velocity.y = 0;
-      player_ig.velocity.x = 0;
-      CANJUMP = true;
-      CANDASH = true;
+      let noGo = platforms[i].position.y + (platforms[i].height/2);
+      if (player_ig.position.y <= platforms[i].position.y && player_ig.position.y < noGo) {
+        player_ig.velocity.x = 0;
+        CANJUMP = true;
+        CANDASH = true;
+      }
+    }
+  }
+
+  for (let i = 0; i < phase_platforms.length; i++) {
+    if(player_ig.collide(phase_platforms[i])) {
+      console.log(phase_platforms[i].position.y);
+      console.log(player_ig.position.y);
+      if (player_ig.position.y <= phase_platforms[i].position.y) {
+        player_ig.velocity.y = 0;
+        player_ig.velocity.x = 0;
+        CANJUMP = true;
+        CANDASH = true;
+      }
     }
   }
   
@@ -90,10 +112,10 @@ function draw() {
       player_ig.velocity.y = 0;
       player_ig.velocity.x = 0;
       if (keyIsDown("65")) {
-        player_ig.velocity.x = -10.5;
+        player_ig.velocity.x = -7.5;
       }
       if (keyIsDown("68")) {
-        player_ig.velocity.x = 10.5;
+        player_ig.velocity.x = 7.5;
       }
       if (keyIsDown("87")) {
         player_ig.velocity.y = -10.5;
