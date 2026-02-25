@@ -35,7 +35,7 @@ function draw() {
   
   fill(200);
   textAlign(CENTER);
-  text("DreamBlock V1", width/2, 20);
+  text("DreamBlock Test", width/2, 20);
   
   if (dashFrames <= 0) {
     player_ig.velocity.y += GRAVITY;
@@ -59,9 +59,9 @@ function draw() {
   for (let i = 0; i < platforms.length; i++) {
     if(player_ig.collide(platforms[i])) {
       player_ig.velocity.y = 0;
+      player_ig.velocity.x = 0;
       let noGo = platforms[i].position.y + (platforms[i].height/2);
       if (player_ig.position.y <= platforms[i].position.y && player_ig.position.y < noGo) {
-        player_ig.velocity.x = 0;
         CANJUMP = true;
         CANDASH = true;
       }
@@ -70,17 +70,19 @@ function draw() {
 
   for (let i = 0; i < phase_platforms.length; i++) {
     if(player_ig.collide(phase_platforms[i])) {
-      console.log(phase_platforms[i].position.y);
-      console.log(player_ig.position.y);
+      player_ig.velocity.y = 0;
+      player_ig.velocity.x = 0;
       if (player_ig.position.y <= phase_platforms[i].position.y) {
-        player_ig.velocity.y = 0;
-        player_ig.velocity.x = 0;
         CANJUMP = true;
         CANDASH = true;
       }
     }
   }
-  
+
+  if (!CANJUMP) {
+    player_ig.velocity.x = player_ig.velocity.x / 1.05
+  }
+
   if ((keyIsDown("68")) && CANJUMP) {
     player_ig.velocity.x += SPEED;
   }
@@ -89,10 +91,10 @@ function draw() {
   }
 
   if ((keyIsDown("68")) && !CANJUMP) {
-    player_ig.velocity.x += 0.1;
+    player_ig.velocity.x += 0.01;
   }
   if ((keyIsDown("65")) && !CANJUMP) {
-    player_ig.velocity.x -= 0.1;
+    player_ig.velocity.x -= 0.01;
   }
   
   if((keyWentDown("up") || keyWentDown("space"))){
@@ -108,20 +110,28 @@ function draw() {
   if (dasher == true) {
       CANDASH = false;
       dasher = false;
+      let jumpAfter = true;
       dashFrames = 12;
       player_ig.velocity.y = 0;
       player_ig.velocity.x = 0;
       if (keyIsDown("65")) {
+        jumpAfter = false;
         player_ig.velocity.x = -7.5;
       }
       if (keyIsDown("68")) {
+        jumpAfter = false;
         player_ig.velocity.x = 7.5;
       }
       if (keyIsDown("87")) {
+        jumpAfter = false;
         player_ig.velocity.y = -10.5;
       }
       if (keyIsDown("83")) {
+        jumpAfter = false;
         player_ig.velocity.y = 10.5;
+      }
+      if (jumpAfter) {
+        CANJUMP = true;
       }
   }
   

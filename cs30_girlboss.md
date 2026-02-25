@@ -1,7 +1,7 @@
 # i love to have fun!
 
-## funnnnnnnnnn?
-- now you see me now you dont
+## demos
+- [scope](02-scope)
 
-## sure
-- now you see me OH FUCK
+## stuffff
+- [DreamBlock_Demo](DreamBlock(V1))
