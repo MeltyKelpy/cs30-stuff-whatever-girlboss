@@ -14,6 +14,7 @@ var current_color = 0;
 var colors = ["red", "green", "blue", "yellow"]
 var platforms = []
 var phase_platforms = []
+var isOnPlatform = false;
 
 function setup() {
   const game = createCanvas(800,400);
@@ -31,13 +32,49 @@ function setup() {
 }
 
 function draw() {
-  background(150,150,150);  
-  
+  background(150,150,150);
+
   fill(200);
   textAlign(CENTER);
   text("DreamBlock Test", width/2, 20);
   
-  if (dashFrames <= 0) {
+  if (isOnPlatform) {
+    player_ig.velocity.y = 0;
+    player_ig.velocity.x = 0;
+  }
+  
+  // console.log(player_ig.velocity.x + ", " + player_ig.velocity.y);
+  
+  for (let i = 0; i < platforms.length; i++) {
+    if(player_ig.collide(platforms[i])) {
+      let noGo = platforms[i].position.y + (platforms[i].height);
+      if (player_ig.position.y <= platforms[i].position.y && player_ig.position.y < noGo) {
+        isOnPlatform = true;
+        if (dashFrames <= 0) {
+          player_ig.velocity.y = 0;
+          player_ig.velocity.x = 0;
+        }
+        CANJUMP = true;
+        CANDASH = true;
+      }
+    }
+  }
+
+  for (let i = 0; i < phase_platforms.length; i++) {
+    if(player_ig.collide(phase_platforms[i])) {
+      if (player_ig.position.y <= phase_platforms[i].position.y) {
+        isOnPlatform = true;
+        if (dashFrames <= 0) {
+          player_ig.velocity.y = 0;
+          player_ig.velocity.x = 0;
+        }
+        CANJUMP = true;
+        CANDASH = true;
+      }
+    }
+  }
+
+  if (dashFrames < -2) {
     player_ig.velocity.y += GRAVITY;
     player_ig.shapeColor = colors[current_color];
   }
@@ -51,53 +88,35 @@ function draw() {
     if (CANJUMP) {
       player_ig.velocity.y = -JUMP;
       CANJUMP = false;
+      isOnPlatform = false;
     }
   }
-  
-  // console.log(player_ig.velocity.x + ", " + player_ig.velocity.y);
-  
-  for (let i = 0; i < platforms.length; i++) {
-    if(player_ig.collide(platforms[i])) {
-      player_ig.velocity.y = 0;
-      player_ig.velocity.x = 0;
-      let noGo = platforms[i].position.y + (platforms[i].height/2);
-      if (player_ig.position.y <= platforms[i].position.y && player_ig.position.y < noGo) {
-        CANJUMP = true;
-        CANDASH = true;
+
+  isOnPlatform = false;
+
+  if (dashFrames <= 0) {
+    player_ig.velocity.x = 0;
+    if ((keyIsDown("68") || keyIsDown("39")) && CANJUMP) {
+      player_ig.velocity.x += SPEED;
+    }
+    if ((keyIsDown("65") || keyIsDown("37")) && CANJUMP) {
+      player_ig.velocity.x -= SPEED;
+    }
+    if ((keyIsDown("68") || keyIsDown("39")) && !CANJUMP) {
+      player_ig.velocity.x += SPEED;
+      if (dashFrames < 0) {
+        player_ig.velocity.x * 1.2;
+      }
+    }
+    if ((keyIsDown("65") || keyIsDown("37")) && !CANJUMP) {
+      player_ig.velocity.x -= SPEED;
+      if (dashFrames < 1) {
+        player_ig.velocity.x * 3;
       }
     }
   }
-
-  for (let i = 0; i < phase_platforms.length; i++) {
-    if(player_ig.collide(phase_platforms[i])) {
-      player_ig.velocity.y = 0;
-      player_ig.velocity.x = 0;
-      if (player_ig.position.y <= phase_platforms[i].position.y) {
-        CANJUMP = true;
-        CANDASH = true;
-      }
-    }
-  }
-
-  if (!CANJUMP) {
-    player_ig.velocity.x = player_ig.velocity.x / 1.05
-  }
-
-  if ((keyIsDown("68")) && CANJUMP) {
-    player_ig.velocity.x += SPEED;
-  }
-  if ((keyIsDown("65")) && CANJUMP) {
-    player_ig.velocity.x -= SPEED;
-  }
-
-  if ((keyIsDown("68")) && !CANJUMP) {
-    player_ig.velocity.x += 0.01;
-  }
-  if ((keyIsDown("65")) && !CANJUMP) {
-    player_ig.velocity.x -= 0.01;
-  }
   
-  if((keyWentDown("up") || keyWentDown("space"))){
+  if((keyWentDown("z") || keyWentDown("space"))){
     if (CANJUMP) {
       player_ig.velocity.y = -JUMP;
       CANJUMP = false;
@@ -107,35 +126,49 @@ function draw() {
     }
   }
   
-  if (dasher == true) {
+  if (dasher == true || dashFrames >= 11) {
       CANDASH = false;
       dasher = false;
+      let dashers = 0;
       let jumpAfter = true;
-      dashFrames = 12;
+      if (dashFrames <= 0) {
+        dashFrames = 12;
+      }
       player_ig.velocity.y = 0;
       player_ig.velocity.x = 0;
-      if (keyIsDown("65")) {
+      if (keyIsDown("65") || keyIsDown("37")) {
+        dashers += 1;
         jumpAfter = false;
-        player_ig.velocity.x = -7.5;
+        player_ig.velocity.x = -9;
       }
-      if (keyIsDown("68")) {
+      if (keyIsDown("68") || keyIsDown("39")) {
+        dashers += 1;
         jumpAfter = false;
-        player_ig.velocity.x = 7.5;
+        player_ig.velocity.x = 9;
       }
-      if (keyIsDown("87")) {
+
+      // JANK ASS CODE BELOW
+
+      if (keyIsDown("87") || keyIsDown("38")) {
+        dashers += 1;
         jumpAfter = false;
-        player_ig.velocity.y = -10.5;
+        player_ig.velocity.y = -9;
       }
-      if (keyIsDown("83")) {
+      if (keyIsDown("83") || keyIsDown("40")) {
+        dashers += 1;
         jumpAfter = false;
         player_ig.velocity.y = 10.5;
+      }
+      if (dashers == 2) {
+        player_ig.velocity.y /= 1.2;
+        player_ig.velocity.x /= 1.2;
       }
       if (jumpAfter) {
         CANJUMP = true;
       }
   }
   
-  if (keyWentDown("shift") && CANDASH) {
+  if ((keyWentDown("shift") || keyWentDown("x")) && CANDASH) {
     dasher = true;
   }
   
