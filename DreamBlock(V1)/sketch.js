@@ -15,32 +15,64 @@ var colors = ["red", "green", "blue", "yellow"]
 var platforms = []
 var phase_platforms = []
 var isOnPlatform = false;
-var camera_constraints = [[200, 100], [300, 100]];
+var camera_constraints = [[100, 0], [2500, 150]];
 
 function setup() {
   const game = createCanvas(800,400);
   game.canvas.style = "";
 
-  player_ig = createSprite(200, 200, 50, 50);
+  player_ig = createSprite(0, 200, 50, 50);
   player_ig.setCollider("rectangle", 0,0,50,50);
   player_ig.shapeColor = color(34, 56, 76);
 
-  var platform = createSprite(400, 400, 1500, 100);
-  var platform3 = createSprite(100, 200, 300, 50);
-  platforms.push(platform);
-  platforms.push(platform3);
+  // ground + wall
+  createPlatform(1000, 400, 4000, 100);
+  createPlatform(-400, 100, 300, 700);
 
-  var platform2 = createSprite(600, 200, 300, 50);
-  phase_platforms.push(platform2);
+  // first hurdles
+  createPlatform(1150, 300, 300, 100);
+  createPlatform(1750, 275, 600, 300);
+  createPlatform(2150, 200, 300, 500);
+
+  // phase 1
+  createPlatform(1850, -25, 300, 50, true);
   
+  camera.position.y = player_ig.position.y-(100);
+  camera.position.y = player_ig.position.y-(25);
+
+  load = createSprite(0, 0, 1500, 1000);
+  load.shapeColor = "black";
+  load.position = camera.position;
+  setTimeout(kill_load, 200);
+
+  noSmooth();
+}
+
+function createPlatform(x = 0, y = 0, width = 10, height = 10, phase = false) {
+  var platform = createSprite(x,y,width,height);
+  if (phase) {
+    phase_platforms.push(platform);
+  }
+  if (!phase) {
+    platforms.push(platform);
+  }
+}
+
+function kill_load() {
+  load.remove();
 }
 
 function draw() {
   background(150,150,150);
 
-  fill(200);
   textAlign(CENTER);
-  text("DreamBlock Test", width/2, 20);
+  textSize(25);
+  fill(0);
+  text("Welcome to DREAMBLOCK\n(demo showcase)\n(movement: WASD or arrow keys)", 100, 30);
+  text("Space or Z to jump", 750, 200);
+  text("Shift or X to dash\n(dashes in your\nmoving direction)", 1250, 175);
+  text("Some Platforms can\nbe Phased Through\non the bottom.", 1850, 40);
+  text("Theres also no fall damage\n      because its fun", 2550, -25);
   
   if (isOnPlatform) {
     player_ig.velocity.y = 0;
@@ -189,9 +221,9 @@ function draw() {
   }
 
 
-  camera.zoom = 0.5;
+  camera.zoom = 0.75;
   
-  camera.position.x = lerp(camera.position.x, player_ig.position.x+(100), 0.2);
+  camera.position.x = lerp(camera.position.x, player_ig.position.x+(100), 0.1);
   if (camera.position.x <= camera_constraints[0][0]) {
     camera.position.x = camera_constraints[0][0];
   }
@@ -199,7 +231,7 @@ function draw() {
     camera.position.x = camera_constraints[1][0];
   }
 
-  camera.position.y = lerp(camera.position.y, player_ig.position.y-(25), 0.2);
+  camera.position.y = lerp(camera.position.y, player_ig.position.y-(25), 0.1);
   if (camera.position.y <= camera_constraints[0][1]) {
     camera.position.y = camera_constraints[0][1];
   }
