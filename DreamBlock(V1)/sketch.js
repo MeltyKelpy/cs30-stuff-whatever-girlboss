@@ -16,6 +16,11 @@ var platforms = []
 var phase_platforms = []
 var isOnPlatform = false;
 var camera_constraints = [[100, 0], [2500, 150]];
+var dashFramers = [];
+var dashFramersSprites = [];
+
+// found this thing for p5.js called p5.play.js, just adds an easier collision detector and
+// changes everything to 
 
 function setup() {
   const game = createCanvas(800,400);
@@ -74,53 +79,21 @@ function draw() {
   text("Some Platforms can\nbe Phased Through\non the bottom.", 1850, 40);
   text("Theres also no fall damage\n      because its fun", 2550, -25);
   
-  if (isOnPlatform) {
-    player_ig.velocity.y = 0;
-    player_ig.velocity.x = 0;
-  }
+  // is this needed? no, i did it right after i finished the code
+  // did i feel like doing it? hell yeah i did
+  collisionManagement();
+  jumperGeometryDash();
+  colorSwapper();
+  dashItUpBuddy();
+  cameraFunctions();
 
-  for (let i = 0; i < platforms.length; i++) {
-    platforms[i].shapeColor = "#2D2F3C";
-    if (player_ig.collide(platforms[i])) {
-      let noGo = platforms[i].position.y + (platforms[i].height);
-      if (player_ig.position.y <= platforms[i].position.y && player_ig.position.y < noGo) {
-        isOnPlatform = true;
-        if (dashFrames <= 0) {
-          player_ig.velocity.y = 0;
-          player_ig.velocity.x = 0;
-        }
-        CANJUMP = true;
-        CANDASH = true;
-      }
-    }
-  }
+  drawSprites();
 
-  for (let i = 0; i < phase_platforms.length; i++) {
-    phase_platforms[i].shapeColor = "#7C4323";
-    // why does +20 and -5 work? I DONT KNOW!!!!!
-    if (player_ig.position.y+(player_ig.height-5) <= (phase_platforms[i].position.y+20)) {
-      isOnPlatform = true;
-      phase_platforms[i].physicsType = 'DYNAMIC';
-      if (player_ig.collide(phase_platforms[i])) {
-        if (dashFrames <= 0) {
-          player_ig.velocity.y = 0;
-          player_ig.velocity.x = 0;
-        }
-        CANJUMP = true;
-        CANDASH = true;
-      }
-    }
-  }
+}
 
-  if (dashFrames < -2) {
-    player_ig.velocity.y += GRAVITY;
-    player_ig.shapeColor = colors[current_color];
-  }
-  else {
-    player_ig.shapeColor = color(255, 255, 255);
-    dashFrames -= 1;
-  }
-  
+// i love organization
+
+function jumperGeometryDash() {
   if (storeJump > 0) {
     storeJump -= 1;
     if (CANJUMP) {
@@ -129,8 +102,6 @@ function draw() {
       isOnPlatform = false;
     }
   }
-
-  isOnPlatform = false;
   
   if((keyWentDown("z") || keyWentDown("space"))){
     if (CANJUMP) {
@@ -141,7 +112,20 @@ function draw() {
       storeJump = 10;
     }
   }
-  
+}
+
+function dashItUpBuddy() {
+
+  if (dashFrames < -2) {
+    player_ig.velocity.y += GRAVITY;
+    player_ig.shapeColor = colors[current_color];
+  }
+  else {
+    player_ig.shapeColor = color(255, 255, 255);
+    dashFrames -= 1;
+  }
+
+  // i know, i know, its atrocious....... i know......
   if (dashFrames <= 0) {
     player_ig.velocity.x = 0;
     if ((keyIsDown("68") || keyIsDown("39")) && CANJUMP) {
@@ -164,6 +148,7 @@ function draw() {
     }
   }
 
+  // i know, i know... its.... deja vu
   if (dasher == true || dashFrames >= 11) {
       CANDASH = false;
       dasher = false;
@@ -206,7 +191,99 @@ function draw() {
   if ((keyWentDown("shift") || keyWentDown("x")) && CANDASH) {
     dasher = true;
   }
+
+  // i already had this idea, but i was inspired to actually do it when my GOAT sitting
+  // beside me did it too, so whatever its fun and i had the idea anyway
+  if (dashFrames > -2) {
+    console.log(dashFramers);
+    if (dashFramers.length >= 4) {
+      var lastFrame = dashFramers[dashFramers.length-1];
+      console.log(abs(player_ig.position.x + player_ig.position.y));
+      console.log(abs(lastFrame[0] + lastFrame[1]));
+      if (dist(player_ig.position.x, player_ig.position.y, lastFrame[0], lastFrame[1]) > 10) {
+        dashFramers.push([player_ig.position.x, player_ig.position.y]);
+      }
+    }
+    else {
+      dashFramers.push([player_ig.position.x, player_ig.position.y]);
+    }
+    for (i in [0, 1, 2, 3]) {
+      if (dashFramers.length > 5) {
+        dashFramers.shift();
+        dashFramersSprites[0].remove();
+        dashFramersSprites.shift();
+      }
+    }
+    for (let i=0;i < dashFramers.length-1;i++) {
+      let alpha = 255 * (i/dashFramers.length-1/10);
+      let dumbSprite = createSprite(dashFramers[i][0], dashFramers[i][1], 50, 50);
+      let colore = color(255,255,255,alpha);
+      dumbSprite.shapeColor = colore;
+      dashFramersSprites.push(dumbSprite);
+    }
+  }
+  else {
+    for (i in [0, 1, 2, 3]) {
+      if (dashFramersSprites.length > 0) {
+        console.log("hello");
+        dashFramers.shift();
+        dashFramersSprites[0].remove();
+        dashFramersSprites.shift();
+      }
+    }
+    dashFramers = [];
+  }
   
+
+}
+
+function collisionManagement() {
+
+  // this exists so the player doesnt gain insane speed when falling off of platforms,
+  // it just makes it run for one extra frame.
+  if (isOnPlatform) {
+    player_ig.velocity.y = 0;
+    player_ig.velocity.x = 0;
+  }
+
+  for (let i = 0; i < platforms.length; i++) {
+    platforms[i].shapeColor = "#2D2F3C";
+    if (player_ig.collide(platforms[i])) {
+      let noGo = platforms[i].position.y + (platforms[i].height);
+      if (player_ig.position.y <= platforms[i].position.y && player_ig.position.y < noGo) {
+        isOnPlatform = true;
+        if (dashFrames <= 0) {
+          player_ig.velocity.y = 0;
+          player_ig.velocity.x = 0;
+        }
+        CANJUMP = true;
+        CANDASH = true;
+      }
+    }
+  }
+
+  for (let i = 0; i < phase_platforms.length; i++) {
+    phase_platforms[i].shapeColor = "#7C4323";
+    // why does +20 and -5 work? I DONT KNOW!!!!!
+    if (player_ig.position.y+(player_ig.height-5) <= (phase_platforms[i].position.y+20)) {
+      isOnPlatform = true;
+      phase_platforms[i].physicsType = 'DYNAMIC';
+      if (player_ig.collide(phase_platforms[i])) {
+        if (dashFrames <= 0) {
+          player_ig.velocity.y = 0;
+          player_ig.velocity.x = 0;
+        }
+        CANJUMP = true;
+        CANDASH = true;
+      }
+    }
+  }
+
+  isOnPlatform = false;
+  
+}
+
+function colorSwapper() {
   if (keyWentDown("q")) {
     current_color -= 1;
   }
@@ -219,8 +296,9 @@ function draw() {
   if (current_color < 0) {
     current_color = colors.length-1;
   }
+}
 
-
+function cameraFunctions() {
   camera.zoom = 0.75;
   
   camera.position.x = lerp(camera.position.x, player_ig.position.x+(100), 0.1);
@@ -238,7 +316,4 @@ function draw() {
   else if (camera.position.y >= camera_constraints[1][1]) {
     camera.position.y = camera_constraints[1][1];
   }
-  
-  drawSprites();
-
 }
