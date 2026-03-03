@@ -18,14 +18,19 @@ var isOnPlatform = false;
 var camera_constraints = [[100, 0], [2500, 150]];
 var dashFramers = [];
 var dashFramersSprites = [];
+var camXOffset = 100;
+var camYOffset = -25;
 
-// found this thing for p5.js called p5.play.js, just adds an easier collision detector and
-// changes everything to 
+// found this thing for p5.js called p5.play.js, just adds an easier collision detector and "sprites" (which are just shapes as i can tell right now lmao)
+// basically changes everything to make my life EASIER!!!!!!!!!!!!! i know how to do all this in normal p5.js though (i tried it out and made decent progress 
+// and then found out about this) thumbs up emoji!
 
 function setup() {
   const game = createCanvas(800,400);
+  // makes it so it can scale in the window
   game.canvas.style = "";
 
+  // guess
   player_ig = createSprite(0, 200, 50, 50);
   player_ig.setCollider("rectangle", 0,0,50,50);
   player_ig.shapeColor = color(34, 56, 76);
@@ -39,17 +44,24 @@ function setup() {
   createPlatform(1750, 275, 600, 300);
   createPlatform(2150, 200, 300, 500);
 
-  // phase 1
+  // phase platform 1
   createPlatform(1850, -25, 300, 50, true);
   
-  camera.position.y = player_ig.position.y-(100);
-  camera.position.y = player_ig.position.y-(25);
+  // guess who added no other ones.
 
+  // guess
+  // it seems bad to make these not variables, but i tried it made the camera freeze in place cuz it needs to check these everytime i update the camera, so it seemed
+  // pointless to use variables here and not there when it wouldn't change anything
+  camera.position.x = player_ig.position.y+camXOffset;
+  camera.position.y = player_ig.position.y+camYOffset;
+
+  // just made this show up for a few frames so that it wouldn't move the camera weirdly at the beginning of the stage when setting the player position
   load = createSprite(0, 0, 1500, 1000);
   load.shapeColor = "black";
   load.position = camera.position;
   setTimeout(kill_load, 200);
 
+  // this didnt rly work idk why, maybe the scaling i did?
   noSmooth();
 }
 
@@ -64,6 +76,7 @@ function createPlatform(x = 0, y = 0, width = 10, height = 10, phase = false) {
 }
 
 function kill_load() {
+  // guess
   load.remove();
 }
 
@@ -94,6 +107,7 @@ function draw() {
 // i love organization
 
 function jumperGeometryDash() {
+  // guess
   if (storeJump > 0) {
     storeJump -= 1;
     if (CANJUMP) {
@@ -116,6 +130,7 @@ function jumperGeometryDash() {
 
 function dashItUpBuddy() {
 
+  // just makes it so the gravity doesnt apply when dashing
   if (dashFrames < -2) {
     player_ig.velocity.y += GRAVITY;
     player_ig.shapeColor = colors[current_color];
@@ -196,40 +211,39 @@ function dashItUpBuddy() {
   // beside me did it too, so whatever its fun and i had the idea anyway
   if (dashFrames > -2) {
     console.log(dashFramers);
-    if (dashFramers.length >= 4) {
+    if (dashFramers.length >= 10) {
+      // dont wanna type this over and over
       var lastFrame = dashFramers[dashFramers.length-1];
-      console.log(abs(player_ig.position.x + player_ig.position.y));
-      console.log(abs(lastFrame[0] + lastFrame[1]));
+      // p5.js has a dist function!!!!! im so glad.
       if (dist(player_ig.position.x, player_ig.position.y, lastFrame[0], lastFrame[1]) > 10) {
+        // push previous frames to the dashFramers array if far enough
         dashFramers.push([player_ig.position.x, player_ig.position.y]);
       }
     }
     else {
+      // push previous frames to the dashFramers array if there is too little
       dashFramers.push([player_ig.position.x, player_ig.position.y]);
     }
-    for (i in [0, 1, 2, 3]) {
-      if (dashFramers.length > 5) {
-        dashFramers.shift();
-        dashFramersSprites[0].remove();
-        dashFramersSprites.shift();
-      }
+
+    if (dashFramers.length > 5) {
+      dashFramers.shift();
+      dashFramersSprites[0].remove();
+      dashFramersSprites.shift();
     }
-    for (let i=0;i < dashFramers.length-1;i++) {
-      let alpha = 255 * (i/dashFramers.length-1/10);
-      let dumbSprite = createSprite(dashFramers[i][0], dashFramers[i][1], 50, 50);
-      let colore = color(255,255,255,alpha);
-      dumbSprite.shapeColor = colore;
-      dashFramersSprites.push(dumbSprite);
-    }
+
+    let alpha = 255 * ((dashFramers.length-1)/dashFramers.length-1/2);
+    let dumbSprite = createSprite(dashFramers[dashFramers.length-1][0], dashFramers[dashFramers.length-1][1], 50, 50);
+    let colore = color(255,255,255,alpha);
+    dumbSprite.shapeColor = colore;
+    dashFramersSprites.push(dumbSprite);
   }
+
   else {
-    for (i in [0, 1, 2, 3]) {
-      if (dashFramersSprites.length > 0) {
-        console.log("hello");
-        dashFramers.shift();
-        dashFramersSprites[0].remove();
-        dashFramersSprites.shift();
-      }
+    if (dashFramersSprites.length > 0) {
+      console.log("hello");
+      dashFramers.shift();
+      dashFramersSprites[0].remove();
+      dashFramersSprites.shift();
     }
     dashFramers = [];
   }
@@ -246,6 +260,7 @@ function collisionManagement() {
     player_ig.velocity.x = 0;
   }
 
+  // normal platform collision
   for (let i = 0; i < platforms.length; i++) {
     platforms[i].shapeColor = "#2D2F3C";
     if (player_ig.collide(platforms[i])) {
@@ -262,6 +277,7 @@ function collisionManagement() {
     }
   }
 
+  // the platforms you can phase under
   for (let i = 0; i < phase_platforms.length; i++) {
     phase_platforms[i].shapeColor = "#7C4323";
     // why does +20 and -5 work? I DONT KNOW!!!!!
@@ -301,7 +317,7 @@ function colorSwapper() {
 function cameraFunctions() {
   camera.zoom = 0.75;
   
-  camera.position.x = lerp(camera.position.x, player_ig.position.x+(100), 0.1);
+  camera.position.x = lerp(camera.position.x, player_ig.position.x+camXOffset, 0.1);
   if (camera.position.x <= camera_constraints[0][0]) {
     camera.position.x = camera_constraints[0][0];
   }
@@ -309,7 +325,7 @@ function cameraFunctions() {
     camera.position.x = camera_constraints[1][0];
   }
 
-  camera.position.y = lerp(camera.position.y, player_ig.position.y-(25), 0.1);
+  camera.position.y = lerp(camera.position.y, player_ig.position.y+camYOffset, 0.1);
   if (camera.position.y <= camera_constraints[0][1]) {
     camera.position.y = camera_constraints[0][1];
   }
