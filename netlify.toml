@@ -1,4 +1,0 @@
-[[redirects]]
-    from = "/*
-    to = "/index.md"
-    status = 200
