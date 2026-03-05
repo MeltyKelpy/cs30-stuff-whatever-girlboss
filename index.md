@@ -1,4 +1,4 @@
-# i love to have fun
+# i love to have fun (School Stuff c":)
 
 ## demos
 - [02-Scope](02-scope)
