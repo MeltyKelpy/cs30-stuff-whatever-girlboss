@@ -52,7 +52,7 @@ function setup() {
   // guess
   // it seems bad to make these not variables, but i tried it made the camera freeze in place cuz it needs to check these everytime i update the camera, so it seemed
   // pointless to use variables here and not there when it wouldn't change anything
-  camera.position.x = player_ig.position.y+camXOffset;
+  camera.position.x = player_ig.position.x+camXOffset;
   camera.position.y = player_ig.position.y+camYOffset;
 
   // just made this show up for a few frames so that it wouldn't move the camera weirdly at the beginning of the stage when setting the player position
