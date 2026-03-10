@@ -1,7 +1,7 @@
 // forgot the header last timee,,,,, oops,,,,,
 
 let my, guests, shared;
-let spawn_cords = {x: 500, y: 100}
+let spawn_cords = {x: 550, y: 100}
 let platforms = [];
 let buddy;
 
@@ -12,37 +12,51 @@ function preload() {
   guests = partyLoadGuestShareds();
   shared = partyLoadShared("shared", {
     player_sprites : [],
+    players_total : 0,
   });
 }
 
 function setup() {
   createCanvas(5000, 720);
 
-  my.me = new pal(spawn_cords.x, spawn_cords.y);
+  my.player = new pal(spawn_cords.x, spawn_cords.y);
   console.log("am i host?", partyIsHost());
+  console.log("me", JSON.stringify(my));
+  console.log("guests", JSON.stringify(guests));
 
-  createPlatform(150,700,width,50);
+  createPlatform(150,600,width,50);
 }
 
-function createPlatform(x = 0, y = 0, width = 10, height = 10) {
-  let platform = createSprite(x,y,width,height);
-  platform.shapeColor = color(255);
-  platforms.push(platform);
+function reset() {
+  my.player = new pal(spawn_cords.x, spawn_cords.y);
+}
+
+function createPlatform(_x = 0, _y = 0, _width = 10, _height = 10, _color = 255) {
+  platforms.push({x : _x,y : _y,width : _width,height : _height,color : _color});
 }
 
 
 function draw() {
   background(50);
-
-  my.me.collisionManager();
-  my.me.cameraFunctions();
-  my.me.update();
-
-  for (let i = 0; i < shared.player_sprites.length; i++) {
-    rect(shared.player_sprites[i].x,shared.player_sprites[i].x,shared.player_sprites[i].width,shared.player_sprites[i].height);
+  
+  if (my.player != null) {
+    my.player.collisionManager();
+    my.player.cameraFunctions();
+    my.player.update();
+  }
+  else {
+    reset();
   }
 
-  drawSprites();
+  for (let guest of guests) {
+    fill(255,0,0);
+    rect(guest.player.x, guest.player.y, guest.player.width, guest.player.height);
+  }
+
+  for (let platform of platforms) {
+    fill(platform.color);
+    rect(platform.x,platform.y,platform.width,platform.height);
+  }
 }
 
   // camera.position.y = lerp(camera.position.y, my.me.y, 0.1);
@@ -59,12 +73,17 @@ class pal {
     this.canJump = true;
     this.isOnPlatform = false;
     this.speed = 10;
-    shared.player_sprites.push({x: x, y: y, width: 50, height: 50});
+    this.x = x;
+    this.y = y;
+    this.width = 50;
+    this.height = 50;
     this.velocity = {x: 0, y: 0};
+    shared.players_total += 1;
   }
 
   update() {
-    this.position += this.velocity;
+    this.x += this.velocity.x;
+    this.y += this.velocity.y;
 
     this.velocity.x = 0;
     if ((keyIsDown("68") || keyIsDown("39")) && this.canJump) {
@@ -82,37 +101,33 @@ class pal {
   }
     
   collisionManager() {
-  
+
     if (this.isOnPlatform) {
       this.velocity.y = 0;
-      this.velocity.x = 0;
+      this.canJump = true;
     }
     else {
-      this.velocity.y += 10;
+      this.velocity.y += 3;
     }
-  
-    // for (let i = 0; i < platforms.length; i++) {
-    //   if (this.collide(platforms[i])) {
-    //     let noGo = platforms[i].position.y + (platforms[i].height);
-    //     if (this.position.y <= platforms[i].position.y && my.me.guy.position.y < noGo) {
-    //       this.velocity.y = 0;
-    //       this.velocity.x = 0;
-    //       this.canJump = true;
-    //     }
-    //   }
-    // }
+
+    this.isOnPlatform = false;
+
+    if (keyIsDown("32") && this.canJump) {
+      this.canJump = false;
+      this.velocity.y -= 25;
+      this.y -= 1;
+    }
+
+    for (let i = 0; i < platforms.length; i++) {
+      if ((this.y + this.height >= platforms[i].y) && (this.x >= platforms[i].x && this.x <= platforms[i].x + platforms[i].width)) {
+        this.isOnPlatform = true;
+        this.velocity.y = 0;
+        this.y = platforms[i].y - this.height;
+      }
+    }
   }
   
   cameraFunctions() {
-    camera.zoom = 1.1;
-    
-    camera.position.x = lerp(camera.position.x, my.me.x, 0.1);
-    if (camera.position.x <= 100) {
-      camera.position.x = 100;
-    }
-    else if (camera.position.x >= 1000) {
-      camera.position.x = 1000;
-    }
   }
 
 }
