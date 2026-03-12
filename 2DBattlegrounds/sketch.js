@@ -11,20 +11,21 @@ function preload() {
   my = partyLoadMyShared();
   guests = partyLoadGuestShareds();
   shared = partyLoadShared("shared", {
-    player_sprites : [],
     players_total : 0,
   });
 }
 
 function setup() {
-  createCanvas(5000, 720);
+  createCanvas(2000, 720);
 
   my.player = new pal(spawn_cords.x, spawn_cords.y);
   console.log("am i host?", partyIsHost());
   console.log("me", JSON.stringify(my));
   console.log("guests", JSON.stringify(guests));
+  noStroke();
+  camera.zoom = 1.5;
 
-  createPlatform(150,600,width,50);
+  createPlatform(0,670,5000,50);
 }
 
 function reset() {
@@ -77,6 +78,7 @@ class pal {
     this.y = y;
     this.width = 50;
     this.height = 50;
+    this.color = (Math.floor(Math.floor(Math.random() * 256)),Math.floor(Math.floor(Math.random() * 256)),Math.floor(Math.floor(Math.random() * 256)))
     this.velocity = {x: 0, y: 0};
     shared.players_total += 1;
   }
@@ -119,15 +121,45 @@ class pal {
     }
 
     for (let i = 0; i < platforms.length; i++) {
-      if ((this.y + this.height >= platforms[i].y) && (this.x >= platforms[i].x && this.x <= platforms[i].x + platforms[i].width)) {
+      if (((this.y + this.height >= platforms[i].y)) && (this.x >= platforms[i].x && this.x <= platforms[i].x + platforms[i].width)) {
         this.isOnPlatform = true;
         this.velocity.y = 0;
         this.y = platforms[i].y - this.height;
       }
     }
+  
+    for (let guest of guests) {
+      if ((this.y + this.height >= guest.y)) {
+        this.velocity.y = 0;
+        this.velocity.x = 0;
+        this.y = guest.y - this.height;
+      }
+    }
   }
   
   cameraFunctions() {
+    let camera_constraints = {x_left: 200, x_right: -3330, y: -120};
+    let camera_y = 0;
+    let camera_x = 0;
+
+    if (height / 2 - this.y < camera_constraints.y) {
+      camera_y = camera_constraints.y;
+    }
+    else {
+      camera_y = height / 2 - this.y;
+    }
+
+    if (width / 2 - this.x > camera_constraints.x_left) {
+      camera_x = camera_constraints.x_left;
+    }
+    else if (width / 2 - this.x < camera_constraints.x_right) {
+      camera_x = camera_constraints.x_right;
+    }
+    else {
+      camera_x = width / 2 - this.x;
+    }
+
+    translate(camera_x, camera_y);
   }
 
 }
