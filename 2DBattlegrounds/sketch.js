@@ -50,7 +50,7 @@ function draw() {
   }
 
   for (let guest of guests) {
-    fill(255,0,0);
+    fill(guest.player.color.r, guest.player.color.g, guest.player.color.b);
     rect(guest.player.x, guest.player.y, guest.player.width, guest.player.height);
   }
 
@@ -78,7 +78,7 @@ class pal {
     this.y = y;
     this.width = 50;
     this.height = 50;
-    this.color = (Math.floor(Math.floor(Math.random() * 256)),Math.floor(Math.floor(Math.random() * 256)),Math.floor(Math.floor(Math.random() * 256)))
+    this.color = {r: Math.floor(Math.floor(Math.random() * 256)), g: Math.floor(Math.floor(Math.random() * 256)), b: Math.floor(Math.floor(Math.random() * 256))}
     this.velocity = {x: 0, y: 0};
     shared.players_total += 1;
   }
