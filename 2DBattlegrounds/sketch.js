@@ -26,6 +26,26 @@ function setup() {
   camera.zoom = 1.5;
 
   createPlatform(0,670,5000,50);
+
+  textSize(28);
+  text("whats ur usernameeee pal", 10, 20);
+
+  // Create input box
+  let inputElem = createInput('');
+    inputElem.input(onInput);
+    inputElem.position(20, 40);
+  }
+
+function onInput() {
+  clear();
+  text("Write in the input box to change the text", 10, 20);
+  fill("green");
+  strokeWeight(10);
+  rect(0, 80, 600, 100);
+
+  // Get the text entered
+  fill("black");
+  text(this.value(), 20, 120);
 }
 
 function reset() {
@@ -80,6 +100,7 @@ class pal {
     this.height = 50;
     this.color = {r: Math.floor(Math.floor(Math.random() * 256)), g: Math.floor(Math.floor(Math.random() * 256)), b: Math.floor(Math.floor(Math.random() * 256))}
     this.velocity = {x: 0, y: 0};
+    this.name = "unnamed fool"
     shared.players_total += 1;
   }
 
