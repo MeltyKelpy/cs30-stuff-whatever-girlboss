@@ -118,6 +118,10 @@ function draw() {
     pop();
   }
 
+  if (hitboxs.length > 3) {
+    hitboxs = [];
+  }
+
   for (let platform of platforms) {
     fill(platform.color);
     rect(platform.x,platform.y,platform.width,platform.height);
@@ -137,6 +141,7 @@ function mouseClicked() {
     my.player.status = 2;
     let removal = shared.hitboxs.length;
     let x_pos = (my.player.x + my.player.width) - 7;
+    my.player.speed = 2;
     if (my.player.last_direction == -1) {
       x_pos = (my.player.x - my.player.width) + 32;
     }
@@ -145,6 +150,7 @@ function mouseClicked() {
       shared.hitboxs.splice(removal, 1);
     }, 140);
     setTimeout(() => {
+      my.player.speed = 7;
       my.player.status = 0;
     }, 160);
   }
