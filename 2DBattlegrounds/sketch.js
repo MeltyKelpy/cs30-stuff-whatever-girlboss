@@ -1,4 +1,20 @@
 // forgot the header last timee,,,,, oops,,,,,
+// Object Notation and Arrays Assignment
+// Aurora Gurel
+// March 5/26
+//
+// Extra for Experts:
+//
+// I presume the use of images counts, but also I have:
+// - A Menu to set username and server to join
+// - System to use multiple servers in the first place lol
+// - A Class for Players
+// - Multiplayer/untaught libraries
+// - Not only using Arrays and Object Notations, but using them in tandem (arrays containing Object Notations)
+//
+// I intend to update this project in the future similarly to DreamBlock, but for now this is what I did.
+// exceedingly simple, gets a good laugh between pals for a minute, and meets more than all the requirements
+// (to my knowledge)
 
 let my, guests, shared;
 let spawn_cords = {x: 550, y: 100}
@@ -33,13 +49,7 @@ function preload() {
 
 function setup() {
   createCanvas(2000, 720);
-
-  for (let guest of guests) {
-    if (guest.name == data["username"]) {
-      data["username"] = "copycat";
-      break
-    }
-  }
+  noSmooth();
 
   my.player = new pal(spawn_cords.x, spawn_cords.y);
   console.log("am i host?", partyIsHost());
@@ -65,7 +75,8 @@ function onInput() {
 }
 
 function reset() {
-  my.player = new pal(spawn_cords.x, spawn_cords.y);
+  my.player = new pal(spawn_cords.x, spawn_cords.y); // reset the pal if it bugs out
+  // i thought i'd use this more ngl
 }
 
 function createPlatform(_x = 0, _y = 0, _width = 10, _height = 10, _color = 255) {
@@ -107,7 +118,6 @@ function draw() {
     tint(guest.player.color.r, guest.player.color.g, guest.player.color.b);
     push();
     scale(guest.player.last_direction, 1);
-    noSmooth();
     // i tried to not do this like this but... it had a weird offset when flipped </3
     if (guest.player.last_direction == -1) {
       image(sprites[guest.player.status], (guest.player.x+sprite_offsets.x)*guest.player.last_direction - 80, guest.player.y+sprite_offsets.y); 
@@ -115,41 +125,38 @@ function draw() {
     else {
       image(sprites[guest.player.status], guest.player.x+sprite_offsets.x, guest.player.y+sprite_offsets.y); 
     }
-    pop();
+    pop(); // i heard this push and pop usage makes this work better? trusting that
   }
 
   if (shared.hitboxs.length > 3) {
-    shared.hitboxs = [];
+    shared.hitboxs = []; // if hitboxes get stuck, delete them! rudimentary solution, but it works well enough
+    // and also keeps the humor of random hitboxes while not letting it get out of hand or anything, def wanna
+    // find a better solution for this though
   }
 
   for (let platform of platforms) {
+    // create platforms! i meant to use more but. eh its fine
     fill(platform.color);
     rect(platform.x,platform.y,platform.width,platform.height);
   }
 }
 
-  // camera.position.y = lerp(camera.position.y, my.me.y, 0.1);
-  // if (camera.position.y <= camera_constraints[0][1]) {
-  //   camera.position.y = camera_constraints[0][1];
-  // }
-  // else if (camera.position.y >= camera_constraints[1][1]) {
-  //   camera.position.y = camera_constraints[1][1];
-  // }
-
 function mouseClicked() {
+  // hitboxing it out
   if (my.player.status < 2) {
     my.player.status = 2;
     let removal = shared.hitboxs.length;
     let x_pos = (my.player.x + my.player.width) - 7;
-    my.player.speed = 2;
+    my.player.speed = 2; // make this guy slow.
     if (my.player.last_direction == -1) {
       x_pos = (my.player.x - my.player.width) + 32;
     }
     shared.hitboxs.push({x: x_pos, y: my.player.y, width: 25, height: 50, "instigator": my.player.name});
     setTimeout(() => {
-      shared.hitboxs.splice(removal, 1);
+      shared.hitboxs.splice(removal, 1); // kill the hitbox after some time
     }, 140);
     setTimeout(() => {
+      // return player to normal after some time
       my.player.speed = 7;
       my.player.status = 0;
     }, 160);
@@ -158,6 +165,7 @@ function mouseClicked() {
 
 class pal {
   constructor(x = 0, y = 0) {
+    // my variables.... uougghh i love classes!
     shared.players_total += 1;
     this.canJump = true;
     this.isOnPlatform = false;
@@ -166,15 +174,10 @@ class pal {
     this.y = y;
     this.width = 50;
     this.height = 50;
-    this.color = {r: Math.floor(Math.floor(Math.random() * 256)), g: Math.floor(Math.floor(Math.random() * 256)), b: Math.floor(Math.floor(Math.random() * 256))}
+    this.color = {r: Math.floor(Math.floor(Math.random() * 256)), g: Math.floor(Math.floor(Math.random() * 256)), b: Math.floor(Math.floor(Math.random() * 256))} // random color
     this.velocity = {x: 0, y: 0};
     this.name = "unnamed fool";
-    if (data["username"] != "" && data["username"] != undefined) {
-      this.name = data["username"];
-      if (this.name == "copycat") {
-        this.name = "copycat" + shared.players_total;
-      }
-    }
+    this.name = data["username"]; // tried to make a solution for same names, but it hated me so whatever
     this.last_direction = 1;
     this.status = 0; // this just determines what to set the animation to
     this.health = 100;
@@ -256,6 +259,8 @@ class pal {
         }
       }
 
+      // scrapped thing for being able to stand on peoples heads
+
       /*for (let guest of guests) {
         if ((this.y + this.height >= guest.y)) {
           this.velocity.y = 0;
@@ -267,6 +272,7 @@ class pal {
   }
   
   cameraFunctions() {
+    // caaammera
     let camera_constraints = {x_left: 200, x_right: -3330, y: -120};
     let camera_y = 0;
     let camera_x = 0;
