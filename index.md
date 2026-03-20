@@ -6,6 +6,7 @@
 - [04-ballarray](04-ballarray)
 - [05-parallax_yay](05-parallaxyayyyy)
 - [07-2D-Grid](07-grid)
+- [08-Rectangular-Grid](08-rect-grid)
 
 ## stuffff
 - [DreamBlock_Demo (0.0.5) (Interactive Scene)](DreamBlock(V1))
