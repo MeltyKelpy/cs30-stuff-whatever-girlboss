@@ -8,6 +8,7 @@
 - [07-2D-Grid](07-grid)
 - [08-Rectangular-Grid](08-rect-grid)
 - [09-Game-of-Life](09-gameoflife)
+- [10-Pal-who-Moves-Around-this-New-World-As-A-Whole-New-Person-in-The-World](10-character)
 
 ## stuffff
 - [DreamBlock_Demo (0.0.5) (Interactive Scene)](DreamBlock(V1))
