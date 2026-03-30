@@ -9,22 +9,16 @@ const CELL_SIZE = 75;
 let grid;
 let rows;
 let cols;
-let walkable = 0;
-let wall = 1;
-let player = 9;
-let newFriendInANewWorld = {
-  x: 0, // really
-  y: 0,
-  dx: 0, // where we WANT the x to be
-  dy: 0, // where we WANT the y to be
-};
-
+const walkable = 0;
+const wall = 1;
+// let player = 9;
 let play_sprite;
 let board;
 let waller;
 let canChangeDir = true;
 let desiredX = 0;
 let desiredY = 0;
+let newFriendInANewWorld;
 
 function preload() {
   board = loadImage("images/board.png");
@@ -36,7 +30,8 @@ function setup() {
   createCanvas(1280, 720);
   cols = Math.floor(height / CELL_SIZE);
   rows = Math.floor(width / CELL_SIZE);
-  grid = generateRandomGrid(cols, rows);
+  grid = generateRandomGrid(cols, rows, false);
+  newFriendInANewWorld = new DTSpade(0,0);
   noStroke();
 }
 
@@ -64,6 +59,7 @@ function generateRandomGrid(cols, rows, filled = true) {
 }
 
 function displayGrid() {
+  // guess
   for (let y = 0; y < cols; y++) {
     for (let x = 0; x < rows; x++) {
       if (grid[y][x] === walkable) {
@@ -77,6 +73,7 @@ function displayGrid() {
 }
 
 function mousePressed() {
+  // the toggle cell code from the old example
   let x = Math.floor(mouseX/CELL_SIZE);
   let y = Math.floor(mouseY/CELL_SIZE);
 
@@ -120,8 +117,8 @@ function keyPutters() {
 
   console.log(desiredX, desiredY);
 
-  if (desiredX !== 0 && desiredY !== 0 && canChangeDir) {
-    movePlayer(newFriendInANewWorld.x + desiredX, newFriendInANewWorld.y + desiredY);
+  if ((desiredX !== 0 || desiredY !== 0) && canChangeDir) {
+    newFriendInANewWorld.movePlayer(newFriendInANewWorld.x + desiredX, newFriendInANewWorld.y + desiredY);
   }
 }
 
@@ -133,20 +130,29 @@ function displayPlayer() {
   image(play_sprite, newFriendInANewWorld.x * CELL_SIZE, newFriendInANewWorld.y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
 }
 
-function movePlayer(_x, _y) {
-  if (_x >= 0 && _x < rows && _y >= 0 && _y < cols && grid[Math.floor(_y)][Math.floor(_x)] === walkable) {
-    canChangeDir = false;
-    newFriendInANewWorld.dx = _x;
-    newFriendInANewWorld.dy = _y;
-    let tween_time = 150;
-    if (_x > newFriendInANewWorld.x && _y > newFriendInANewWorld.y) {
-      tween_time = 250;
+class DTSpade {
+  constructor(_x = 0, _y = 0) {
+    this.x = _x;
+    this.y = _y;
+    this.dx = 0;
+    this.dy = 0;
+  }
+
+  movePlayer(_x, _y) {
+    if (_x >= 0 && _x < rows && _y >= 0 && _y < cols && grid[Math.floor(_y)][Math.floor(_x)] === walkable) {
+      canChangeDir = false;
+      this.dx = _x;
+      this.dy = _y;
+      let tween_time = 250;
+      if (_x !== this.x && _y !== this.y) {
+        tween_time = 375;
+      }
+      p5.tween.manager
+        .addTween(this, 'tween1')
+        .addMotions([{ key: 'x', target: _x},{ key: 'y', target: _y}], tween_time, 'easeInLinear')
+        .startTween()
+        .onEnd(() => canChangeDir = true);
+      keyPutters();
     }
-    p5.tween.manager
-      .addTween(newFriendInANewWorld, 'tween1')
-      .addMotions([{ key: 'x', target: _x},{ key: 'y', target: _y}], tween_time, 'easeInLinear')
-      .startTween()
-      .onEnd(() => canChangeDir = true);
-    keyPutters();
   }
 }
