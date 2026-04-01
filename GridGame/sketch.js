@@ -5,6 +5,7 @@
 // Extra for Experts:
 // - describe what you did to take this project "above and beyond"
 
+const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 const CELL_SIZE = 75;
 let grid;
 let rows;
@@ -13,17 +14,24 @@ const walkable = 0;
 const wall = 1;
 // let player = 9;
 let play_sprite;
+let walk_sprite;
+let doc_sprite;
 let board;
 let waller;
 let canChangeDir = true;
 let desiredX = 0;
 let desiredY = 0;
 let newFriendInANewWorld;
+let documentt;
+let anim_state = 0;
+let anims = [play_sprite, walk_sprite];
 
 function preload() {
   board = loadImage("images/board.png");
   waller = loadImage("images/wall.png");
-  play_sprite = loadImage("images/mypal.png");
+  play_sprite = loadImage("images/spade.png");
+  walk_sprite = loadImage("images/spade_walk.png");
+  doc_sprite = loadImage("images/document.png");
 }
 
 function setup() {
@@ -32,6 +40,8 @@ function setup() {
   rows = Math.floor(width / CELL_SIZE);
   grid = generateRandomGrid(cols, rows, false);
   newFriendInANewWorld = new DTSpade(0,0);
+  documentt = new Document(1,5);
+  documentt.update();
   noStroke();
 }
 
@@ -55,7 +65,7 @@ function generateRandomGrid(cols, rows, filled = true) {
     }
     output.push(curArray);
   }
-  return output;
+  return output
 }
 
 function displayGrid() {
@@ -95,7 +105,8 @@ function draw() {
   background(220);
 
   displayGrid();
-  displayPlayer();
+  newFriendInANewWorld.displayPlayer();
+  documentt.update();
   keyPutters();
 }
 
@@ -115,19 +126,12 @@ function keyPutters() {
     desiredX = 1;
   }
 
-  console.log(desiredX, desiredY);
-
   if ((desiredX !== 0 || desiredY !== 0) && canChangeDir) {
     newFriendInANewWorld.movePlayer(newFriendInANewWorld.x + desiredX, newFriendInANewWorld.y + desiredY);
   }
 }
 
 function keyPressed() {
-}
-
-function displayPlayer() {
-  fill("red");
-  image(play_sprite, newFriendInANewWorld.x * CELL_SIZE, newFriendInANewWorld.y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
 }
 
 class DTSpade {
@@ -143,16 +147,57 @@ class DTSpade {
       canChangeDir = false;
       this.dx = _x;
       this.dy = _y;
-      let tween_time = 250;
+      let tween_time = 375;
       if (_x !== this.x && _y !== this.y) {
-        tween_time = 375;
+        tween_time = 500;
       }
       p5.tween.manager
         .addTween(this, 'tween1')
         .addMotions([{ key: 'x', target: _x},{ key: 'y', target: _y}], tween_time, 'easeInLinear')
         .startTween()
-        .onEnd(() => canChangeDir = true);
+        .onEnd(() => this.ender());
       keyPutters();
+    }
+  }
+
+  async ender() {
+    await wait(200);
+    canChangeDir = true;
+  }
+
+  displayPlayer() {
+    fill("red");
+    image(anims[anim_state], newFriendInANewWorld.x * CELL_SIZE, newFriendInANewWorld.y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+  }
+}
+
+class Document {
+  constructor(_x = 0, _y = 0) {
+    this.x = _x;
+    this.orig_y = _y * CELL_SIZE;
+    this.y = _y * CELL_SIZE;
+    this.in_anim = false;
+  }
+
+  update() {
+    image(doc_sprite, this.x * CELL_SIZE, this.y, CELL_SIZE, CELL_SIZE);
+    console.log(this.y);
+    if (this.in_anim === false) {
+      this.in_anim = true;
+      if (this.y === this.orig_y) {
+        p5.tween.manager
+          .addTween(this, 'tween1')
+          .addMotions([{ key: 'x', target: this.x},{ key: 'y', target: this.y - 10}], 500, 'easeOutQuart')
+          .startTween()
+          .onEnd(() => this.in_anim = false);
+      }
+      else if (this.y === this.orig_y + -10) {
+        p5.tween.manager
+          .addTween(this, 'tween2')
+          .addMotions([{ key: 'x', target: this.x},{ key: 'y', target: this.y + 10}], 500, 'easeInQuart')
+          .startTween()
+          .onEnd(() => this.in_anim = false);
+      }
     }
   }
 }
