@@ -15,6 +15,8 @@ const wall = 1;
 // let player = 9;
 let play_sprite;
 let walk_sprite;
+let play_spriteF;
+let walk_spriteF;
 let doc_sprite;
 let board;
 let waller;
@@ -24,20 +26,23 @@ let desiredY = 0;
 let newFriendInANewWorld;
 let documentt;
 let anim_state = 0;
-let anims = [play_sprite, walk_sprite];
+let anims = [];
 
 function preload() {
   board = loadImage("images/board.png");
   waller = loadImage("images/wall.png");
   play_sprite = loadImage("images/spade.png");
   walk_sprite = loadImage("images/spade_walk.png");
+  play_spriteF = loadImage("images/spadeF.png");
+  walk_spriteF = loadImage("images/spade_walkF.png");
   doc_sprite = loadImage("images/document.png");
+  anims = [play_sprite, walk_sprite, play_spriteF, walk_spriteF];
 }
 
 function setup() {
   createCanvas(1280, 720);
-  cols = Math.floor(height / CELL_SIZE);
-  rows = Math.floor(width / CELL_SIZE);
+  cols = Math.floor(height*6 / CELL_SIZE);
+  rows = Math.floor(width*6 / CELL_SIZE);
   grid = generateRandomGrid(cols, rows, false);
   newFriendInANewWorld = new DTSpade(0,0);
   documentt = new Document(1,5);
@@ -84,10 +89,10 @@ function displayGrid() {
 
 function mousePressed() {
   // the toggle cell code from the old example
-  let x = Math.floor(mouseX/CELL_SIZE);
-  let y = Math.floor(mouseY/CELL_SIZE);
+  // let x = Math.floor(mouseX/CELL_SIZE);
+  // let y = Math.floor(mouseY/CELL_SIZE);
 
-  toggleCell(x, y);
+  // toggleCell(x, y);
 }
 
 function toggleCell(x, y) {
@@ -104,6 +109,7 @@ function toggleCell(x, y) {
 function draw() {
   background(220);
 
+  newFriendInANewWorld.cameraFunctions();
   displayGrid();
   newFriendInANewWorld.displayPlayer();
   documentt.update();
@@ -113,17 +119,31 @@ function draw() {
 function keyPutters() {
   desiredX = 0;
   desiredY = 0;
-  if (keyIsDown(83)) {
+  if (keyIsDown(83) && canChangeDir) {
     desiredY = 1;
+    if (anim_state === 2) {
+      anim_state = 3;
+    }
+    if (anim_state === 0) {
+      anim_state = 1;
+    }
   }
-  if (keyIsDown(87)) {
+  if (keyIsDown(87) && canChangeDir) {
     desiredY = -1;
+    if (anim_state === 2) {
+      anim_state = 3;
+    }
+    if (anim_state === 0) {
+      anim_state = 1;
+    }
   }
-  if (keyIsDown(65)) {
+  if (keyIsDown(65) && canChangeDir) {
     desiredX = -1;
+    anim_state = 3;
   }
-  if (keyIsDown(68)) {
+  if (keyIsDown(68) && canChangeDir) {
     desiredX = 1;
+    anim_state = 1;
   }
 
   if ((desiredX !== 0 || desiredY !== 0) && canChangeDir) {
@@ -140,6 +160,7 @@ class DTSpade {
     this.y = _y;
     this.dx = 0;
     this.dy = 0;
+    this.facing_dir = 1;
   }
 
   movePlayer(_x, _y) {
@@ -147,13 +168,13 @@ class DTSpade {
       canChangeDir = false;
       this.dx = _x;
       this.dy = _y;
-      let tween_time = 375;
+      let tween_time = 275;
       if (_x !== this.x && _y !== this.y) {
-        tween_time = 500;
+        tween_time = 350;
       }
       p5.tween.manager
         .addTween(this, 'tween1')
-        .addMotions([{ key: 'x', target: _x},{ key: 'y', target: _y}], tween_time, 'easeInLinear')
+        .addMotions([{ key: 'x', target: _x},{ key: 'y', target: _y}], tween_time, 'easeOutQuart')
         .startTween()
         .onEnd(() => this.ender());
       keyPutters();
@@ -161,13 +182,47 @@ class DTSpade {
   }
 
   async ender() {
-    await wait(200);
+    if (anim_state === 3) {
+      anim_state = 2;
+    }
+    if (anim_state === 1) {
+      anim_state = 0;
+    }
+    await wait(250);
     canChangeDir = true;
   }
 
   displayPlayer() {
     fill("red");
-    image(anims[anim_state], newFriendInANewWorld.x * CELL_SIZE, newFriendInANewWorld.y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+    image(anims[anim_state], newFriendInANewWorld.x * CELL_SIZE - CELL_SIZE/2, newFriendInANewWorld.y * CELL_SIZE - CELL_SIZE, CELL_SIZE*2, CELL_SIZE*2);
+  }
+
+  cameraFunctions() {
+    // caaammera
+    let camera_constraints = {x_left: 0, x_right: -1000, y: -100};
+    let camera_y = 0;
+    let camera_x = 0;
+    let our_x = newFriendInANewWorld.x * CELL_SIZE - CELL_SIZE/2;
+    let our_y = newFriendInANewWorld.y * CELL_SIZE - CELL_SIZE;
+
+    if (height / 2 - our_y < camera_constraints.y) {
+      camera_y = camera_constraints.y;
+    }
+    else {
+      camera_y = height / 2 - our_y;
+    }
+
+    if (width / 2 - our_x > camera_constraints.x_left) {
+      camera_x = camera_constraints.x_left;
+    }
+    else if (width / 2 - our_x < camera_constraints.x_right) {
+      camera_x = camera_constraints.x_right;
+    }
+    else {
+      camera_x = width / 2 - our_x;
+    }
+
+    translate(camera_x, camera_y);
   }
 }
 
@@ -180,8 +235,12 @@ class Document {
   }
 
   update() {
-    image(doc_sprite, this.x * CELL_SIZE, this.y, CELL_SIZE, CELL_SIZE);
-    console.log(this.y);
+    image(doc_sprite, this.x * CELL_SIZE - CELL_SIZE/3, this.y, CELL_SIZE*1.4, CELL_SIZE*1.4);
+    let dister = dist(newFriendInANewWorld.x, newFriendInANewWorld.y, this.x, this.orig_y/CELL_SIZE);
+    if (dister < 1) {
+      textAlign(CENTER);
+      text("Collect\n[SPACE]", this.x * CELL_SIZE + 25, this.orig_y);
+    }
     if (this.in_anim === false) {
       this.in_anim = true;
       if (this.y === this.orig_y) {
