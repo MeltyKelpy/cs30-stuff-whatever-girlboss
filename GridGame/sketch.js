@@ -47,7 +47,6 @@ function setup() {
   newFriendInANewWorld = new DTSpade(0,0);
   documentt = new Document(1,5);
   documentt.update();
-  noStroke();
 }
 
 function generateRandomGrid(cols, rows, filled = true) {
@@ -70,7 +69,7 @@ function generateRandomGrid(cols, rows, filled = true) {
     }
     output.push(curArray);
   }
-  return output
+  return output;
 }
 
 function displayGrid() {
@@ -107,8 +106,8 @@ function toggleCell(x, y) {
 }
 
 function draw() {
+  noStroke();
   background(220);
-
   newFriendInANewWorld.cameraFunctions();
   displayGrid();
   newFriendInANewWorld.displayPlayer();
@@ -193,13 +192,12 @@ class DTSpade {
   }
 
   displayPlayer() {
-    fill("red");
     image(anims[anim_state], newFriendInANewWorld.x * CELL_SIZE - CELL_SIZE/2, newFriendInANewWorld.y * CELL_SIZE - CELL_SIZE, CELL_SIZE*2, CELL_SIZE*2);
   }
 
   cameraFunctions() {
     // caaammera
-    let camera_constraints = {x_left: 0, x_right: -1000, y: -100};
+    let camera_constraints = {x_left: 100, x_right: -1000, y: -100};
     let camera_y = 0;
     let camera_x = 0;
     let our_x = newFriendInANewWorld.x * CELL_SIZE - CELL_SIZE/2;
@@ -222,7 +220,7 @@ class DTSpade {
       camera_x = width / 2 - our_x;
     }
 
-    translate(camera_x, camera_y);
+    translate(camera_x-75, camera_y);
   }
 }
 
@@ -232,30 +230,40 @@ class Document {
     this.orig_y = _y * CELL_SIZE;
     this.y = _y * CELL_SIZE;
     this.in_anim = false;
+    this.isAlive = true;
   }
 
   update() {
-    image(doc_sprite, this.x * CELL_SIZE - CELL_SIZE/3, this.y, CELL_SIZE*1.4, CELL_SIZE*1.4);
-    let dister = dist(newFriendInANewWorld.x, newFriendInANewWorld.y, this.x, this.orig_y/CELL_SIZE);
-    if (dister < 1) {
-      textAlign(CENTER);
-      text("Collect\n[SPACE]", this.x * CELL_SIZE + 25, this.orig_y);
-    }
-    if (this.in_anim === false) {
-      this.in_anim = true;
-      if (this.y === this.orig_y) {
-        p5.tween.manager
-          .addTween(this, 'tween1')
-          .addMotions([{ key: 'x', target: this.x},{ key: 'y', target: this.y - 10}], 500, 'easeOutQuart')
-          .startTween()
-          .onEnd(() => this.in_anim = false);
+    if (this.isAlive === true) {
+      image(doc_sprite, this.x * CELL_SIZE - CELL_SIZE/3, this.y, CELL_SIZE*1.4, CELL_SIZE*1.4);
+      let dister = dist(newFriendInANewWorld.x, newFriendInANewWorld.y, this.x, this.orig_y/CELL_SIZE);
+      if (dister < 1) {
+        textAlign(CENTER);
+        strokeWeight(5);
+        stroke(0);
+        fill("white");
+        text("Collect\n[SPACE]", this.x * CELL_SIZE + 25, this.orig_y + 100);
+        if (keyIsDown(32)) {
+          console.log("collect!");
+          this.isAlive = false;
+        }
       }
-      else if (this.y === this.orig_y + -10) {
-        p5.tween.manager
-          .addTween(this, 'tween2')
-          .addMotions([{ key: 'x', target: this.x},{ key: 'y', target: this.y + 10}], 500, 'easeInQuart')
-          .startTween()
-          .onEnd(() => this.in_anim = false);
+      if (this.in_anim === false) {
+        this.in_anim = true;
+        if (this.y === this.orig_y) {
+          p5.tween.manager
+            .addTween(this, 'tween1')
+            .addMotions([{ key: 'x', target: this.x},{ key: 'y', target: this.y - 10}], 500, 'easeOutQuart')
+            .startTween()
+            .onEnd(() => this.in_anim = false);
+        }
+        else if (this.y === this.orig_y + -10) {
+          p5.tween.manager
+            .addTween(this, 'tween2')
+            .addMotions([{ key: 'x', target: this.x},{ key: 'y', target: this.y + 10}], 500, 'easeInQuart')
+            .startTween()
+            .onEnd(() => this.in_anim = false);
+        }
       }
     }
   }
