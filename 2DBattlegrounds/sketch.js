@@ -62,18 +62,6 @@ function setup() {
   createPlatform(0,670,5000,50);
 }
 
-function onInput() {
-  clear();
-  text("Write in the input box to change the text", 10, 20);
-  fill("green");
-  strokeWeight(10);
-  rect(0, 80, 600, 100);
-
-  // Get the text entered
-  fill("black");
-  text(this.value(), 20, 120);
-}
-
 function reset() {
   my.player = new pal(spawn_cords.x, spawn_cords.y); // reset the pal if it bugs out
   // i thought i'd use this more ngl
