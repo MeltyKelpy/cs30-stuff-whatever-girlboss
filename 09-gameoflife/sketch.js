@@ -1,5 +1,3 @@
-// code i stole out of #laziness
-
 let CELL_SIZE = 5;
 let grid;
 let rows;
