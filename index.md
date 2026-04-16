@@ -9,7 +9,9 @@
 - [08-Rectangular-Grid](08-rect-grid)
 - [09-Game-of-Life](09-gameoflife)
 - [10-Pal-who-Moves-Around-this-New-World-As-A-Whole-New-Person-in-The-World](10-character)
+- [13-fireworks](13-fireworks)
 
 ## stuffff
 - [DreamBlock_Demo (0.0.5) (Interactive Scene)](DreamBlock(V1))
 - [Unnamed JS Fighting Game (Array and Object Notations)](2DBattlegrounds)
+- [DT.Spade's Fetch-Quest Adventure! (Grid Game)](GridGame)
